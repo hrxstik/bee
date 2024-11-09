@@ -5,7 +5,10 @@ interface Props {
   y: number;
   diameter: number;
   onMove: (newX: number, newY: number) => void;
+  onClickCircle: (index: number, event: React.MouseEvent) => void;
   zIndex: number;
+  selectedCircles: number[];
+  isSelected: boolean;
 }
 
 /**
@@ -20,18 +23,31 @@ interface Props {
  * @param {number} props.y - The initial y-coordinate of the circle.
  * @param {number} props.diameter - The diameter of the circle.
  * @param {function} props.onMove - Callback function to handle the circle's new position.
+ * @param {function} props.onClickCircle - Callback function to handle the circle's selection.
  * @param {number} props.zIndex - The z-index of the circle for stacking order.
+ * @param {boolean} props.isSelected - The state, whether the circle is or not;
+ * @param {Array<number>} props.selectedCircles - An array of selected circles indexes.
  *
  * @returns {JSX.Element} The rendered Circle component.
  */
-export const Circle: React.FC<Props> = ({ x, y, diameter, onMove, zIndex }) => {
+export const Circle: React.FC<Props> = ({
+  x,
+  y,
+  diameter,
+  onMove,
+  zIndex,
+  onClickCircle,
+  selectedCircles,
+  isSelected,
+}) => {
   const [isDragging, setIsDragging] = React.useState(false);
   const offsetRef = React.useRef({ x: 0, y: 0 });
 
   /**
    * Handles the mouse down event for initiating a drag.
    *
-   * This function sets the dragging state to true and calculates the initial
+   * If `zIndex` of the circle is in `selectedCircles`,
+   * this function sets the dragging state to true and calculates the initial
    * offset between the mouse position and the circle's position. This offset
    * is used to maintain the relative position of the mouse to the circle during
    * dragging.
@@ -41,9 +57,11 @@ export const Circle: React.FC<Props> = ({ x, y, diameter, onMove, zIndex }) => {
    * @returns {void} This function does not return a value.
    */
   const handleMouseDown = (event: React.MouseEvent) => {
-    setIsDragging(true);
-    offsetRef.current.x = event.clientX - x;
-    offsetRef.current.y = event.clientY - y;
+    if (selectedCircles.includes(zIndex)) {
+      setIsDragging(true);
+      offsetRef.current.x = event.clientX - x;
+      offsetRef.current.y = event.clientY - y;
+    }
   };
 
   /**
@@ -91,9 +109,9 @@ export const Circle: React.FC<Props> = ({ x, y, diameter, onMove, zIndex }) => {
 
   return (
     <div
-      className={`absolute bg-sky-700 rounded-full cursor-grab ${
-        isDragging ? 'cursor-grabbing' : ''
-      } `}
+      className={`absolute rounded-full cursor-grab ${isDragging ? 'cursor-grabbing' : ''} ${
+        isSelected ? 'bg-sky-700' : 'bg-sky-500'
+      }`}
       style={{
         left: `${x}px`,
         top: `${y}px`,
@@ -102,6 +120,7 @@ export const Circle: React.FC<Props> = ({ x, y, diameter, onMove, zIndex }) => {
         zIndex: zIndex,
       }}
       onMouseDown={handleMouseDown}
+      onClick={(event: React.MouseEvent) => onClickCircle(zIndex, event)}
     />
   );
 };

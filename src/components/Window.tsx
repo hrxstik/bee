@@ -4,7 +4,9 @@ import { Circle } from './Circle';
 interface Props {
   style?: React.CSSProperties;
   circles: { x: number; y: number; diameter: number }[];
-  onMoveCircle: (index: number, newX: number, newY: number) => void;
+  onMoveCircle: (newX: number, newY: number) => void;
+  onClickCircle: (index: number, event: React.MouseEvent) => void;
+  selectedCircles: number[];
 }
 
 /**
@@ -20,10 +22,19 @@ interface Props {
  *   where each circle is defined by its x and y coordinates and diameter.
  * @param {function} props.onMoveCircle - Callback function to handle the movement of a circle.
  *   It receives the index of the circle being moved and its new coordinates.
+ * @param {function} props.onClickCircle - Callback function to handle the click on a circle.
+ *   It receives the index of the circle being clicked and mouse event.
+ * @param {Array<number>} props.selectedCircles - An array of selected circles indexes.
  *
  * @returns {JSX.Element} The rendered Window component containing the circles.
  */
-export const Window: React.FC<Props> = ({ style, circles, onMoveCircle }) => {
+export const Window: React.FC<Props> = ({
+  style,
+  circles,
+  onMoveCircle,
+  onClickCircle,
+  selectedCircles,
+}) => {
   return (
     <div style={style} className={'relative bg-white rounded-xl shadow-xl overflow-hidden'}>
       {circles.map((circle, index) => (
@@ -32,8 +43,11 @@ export const Window: React.FC<Props> = ({ style, circles, onMoveCircle }) => {
           x={circle.x}
           y={circle.y}
           diameter={circle.diameter}
-          onMove={(newX, newY) => onMoveCircle(index, newX, newY)}
           zIndex={index}
+          selectedCircles={selectedCircles}
+          onMove={(newX, newY) => onMoveCircle(newX, newY)}
+          onClickCircle={onClickCircle}
+          isSelected={selectedCircles.includes(index)}
         />
       ))}
     </div>
